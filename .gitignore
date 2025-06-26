@@ -1,0 +1,11 @@
+# Ignore everything by default
+/*
+
+# Except these folders
+!/aerospace/
+!/sketchybar/
+!/karabiner/
+
+# Allow .gitignore and README.md at root
+!.gitignore
+!README.md
