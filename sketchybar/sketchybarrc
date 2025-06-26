@@ -1,0 +1,235 @@
+# This is a demo config to showcase some of the most important commands.
+# It is meant to be changed and configured, as it is intentionally kept sparse.
+# For a (much) more advanced configuration example see my dotfiles:
+# https://github.com/FelixKratz/dotfiles
+# code .config/configs.code-workspace
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+
+##### Bar Appearance #####
+# Configuring the general appearance of the bar.
+# These are only some of the options available. For all options see:
+# https://felixkratz.github.io/SketchyBar/config/bar
+# If you are looking for other colors, see the color picker:
+# https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
+
+
+bar=(
+  height=35
+  blur_radius=30
+  position=top
+  sticky=off
+  padding_left=10
+  padding_right=10
+  color=0x15ffffff
+)
+
+sketchybar --bar "${bar[@]}"
+#sketchybar --bar position=top height=35 blur_radius=0 color=0x40000000
+
+##### Changing Defaults #####
+# We now change some default values, which are applied to all further items.
+# For a full list of all available item properties see:
+# https://felixkratz.github.io/SketchyBar/config/items
+
+default=(
+  padding_left=5
+  padding_right=5
+  icon.font="Hack Nerd Font:Bold:17.0"
+  label.font="Hack Nerd Font:Bold:14.0"
+  icon.color=0xffffffff
+  label.color=0xffffffff
+  icon.padding_left=4
+  icon.padding_right=4
+  label.padding_left=4
+  label.padding_right=4
+)
+sketchybar --default "${default[@]}"
+
+##### Adding Mission Control Space Indicators #####
+# Let's add some mission control spaces:
+# https://felixkratz.github.io/SketchyBar/config/components#space----associate-mission-control-spaces-with-an-item
+# to indicate active and available mission control spaces.
+
+sketchybar --add event aerospace_workspace_change
+sketchybar --add event aerospace_mode_change
+sketchybar --add event aerospace_window_title_change
+# for sid in $(aerospace list-workspaces --all); do
+#     sketchybar --add item space.$sid left \
+#         --subscribe space.$sid aerospace_workspace_change \
+#         --set space.$sid \
+#         background.color=0x44ffffff \
+#         background.corner_radius=5 \
+#         background.height=20 \
+#         background.drawing=off \
+#         label="$sid" \
+#         click_script="aerospace workspace $sid" \
+#         script="$CONFIG_DIR/plugins/aerospace.sh $sid"
+# done
+
+
+
+#### CURRENT WORKSPACE ####
+sketchybar --add item space.cur left \
+        --subscribe space.cur aerospace_workspace_change \
+        --set space.cur \
+        label.padding_left=0 \
+        label=" " \
+        script="$CONFIG_DIR/plugins/aerospace_w_name.sh cur"\
+        click_script='sketchybar -m --set space.cur popup.drawing=toggle'
+
+ for sid in $(aerospace list-workspaces --all); do
+     sketchybar --add item space.$sid popup.space.cur \
+         --set space.$sid \
+         background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25 \
+         label="$sid" \
+         click_script="aerospace workspace $sid;
+         sketchybar -m --set space.cur popup.drawing=toggle" 
+ done
+
+
+### Current Aerospace Mode ####
+
+sketchybar --add item aero.mode left \
+        --subscribe aero.mode aerospace_mode_change \
+        --set aero.mode \
+        label.padding_left=0 \
+        label="󰗚 main" \
+        script="$CONFIG_DIR/plugins/aerospace_mode_name.sh cur"\
+        click_script='sketchybar -m --set aero.mode popup.drawing=toggle'
+
+ for sid in $(aerospace list-modes); do
+     sketchybar --add item mode.$sid popup.aero.mode \
+         --set mode.$sid \
+         background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25 \
+         label="$sid" \
+         click_script="aerospace mode $sid;
+         sketchybar -m --set aero.mode popup.drawing=toggle" 
+ done
+
+sketchybar --add item window.title left \
+        --subscribe window.title aerospace_window_title_change \
+        --set window.title \
+        label.padding_left=0 \
+        label="󰗚 main" \
+        label.drawing=on \
+        icon=󱦞 \
+        icon.drawing=off \
+        script="$CONFIG_DIR/plugins/window_title.sh cur" \
+        click_script='sketchybar --set window.title label.drawing=toggle icon.drawing=toggle'
+
+
+
+sketchybar --add bracket aerospace space.cur aero.mode window.titleicon window.title \
+           --set aerospace background.color=0xaa000000 \
+                                background.corner_radius=4  \
+                                background.height=25 \
+                                click_script='sketchybar --set window.title drawing=toggle icon.drawing=toggle'
+
+sketchybar --add item el.pibe.scripts left \
+        --set el.pibe.scripts \
+        label.padding_left=0 \
+        label.padding_right=7 \
+        label="" \
+        click_script="sketchybar -m --set \$NAME popup.drawing=toggle" \
+        background.color=0xaa000000 \
+        background.corner_radius=5 \
+        popup.background.border_width=2 \
+        popup.background.corner_radius=3 \
+        popup.background.border_color=0xff9dd274 \
+        background.height=25
+
+sketchybar --add item run.elpibe popup.el.pibe.scripts  \
+        --set run.elpibe \
+        label.padding_left=0 \
+        label.padding_right=7 \
+        label=" El Pibe" \
+        click_script="/usr/local/bin/code ~/repos2/el_pibe;
+         sketchybar -m --set el.pibe.scripts popup.drawing=toggle" \
+        background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25
+sketchybar --add item run.core popup.el.pibe.scripts  \
+        --set run.core \
+        label.padding_left=0 \
+        label.padding_right=7 \
+        label=" Core Module" \
+        click_script="/usr/local/bin/code ~/repos2/core_module;
+         sketchybar -m --set el.pibe.scripts popup.drawing=toggle" \
+        background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25
+sketchybar --add item run.ds popup.el.pibe.scripts  \
+        --set run.ds \
+        label.padding_left=0 \
+        label.padding_right=7 \
+        label="󱦹 Design System" \
+        click_script="/usr/local/bin/code ~/repos2/design_system;
+         sketchybar -m --set el.pibe.scripts popup.drawing=toggle" \
+        background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25
+sketchybar --add item run.dp popup.el.pibe.scripts  \
+        --set run.dp \
+        label.padding_left=0 \
+        label.padding_right=7 \
+        label=" Dependencies Module" \
+        click_script="/usr/local/bin/code ~/repos2/dependencies_module;
+         sketchybar -m --set el.pibe.scripts popup.drawing=toggle" \
+        background.color=0xaa000000 \
+        background.corner_radius=5  \
+        background.height=25
+##### Adding Left Items #####
+# We add some regular items to the left side of the bar, where
+# only the properties deviating from the current defaults need to be set
+
+# sketchybar --add item chevron left \
+#            --set chevron icon= label.drawing=off \
+#            --add item front_app left \
+#            --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
+#            --subscribe front_app front_app_switched
+
+
+
+##### Adding Right Items #####
+# In the same way as the left items we can add items to the right side.
+# Additional position (e.g. center) are available, see:
+# https://felixkratz.github.io/SketchyBar/config/items#adding-items-to-sketchybar
+
+# Some items refresh on a fixed cycle, e.g. the clock runs its script once
+# every 10s. Other items respond to events they subscribe to, e.g. the
+# volume.sh script is only executed once an actual change in system audio
+# volume is registered. More info about the event system can be found here:
+# https://felixkratz.github.io/SketchyBar/config/events
+
+sketchybar --add item clock right \
+           --set clock update_freq=10 icon=  script="$PLUGIN_DIR/clock.sh" \
+           --add item volume right \
+           --set volume script="$PLUGIN_DIR/volume.sh" \
+           --subscribe volume volume_change \
+           --add item battery right \
+           --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+           --subscribe battery system_woke power_source_change \
+           --add item binding.mode right \
+           --set binding.mode icon= label.drawing=off \
+           --add item refresh right \
+           --set refresh icon=󰑓 label.drawing=off\
+           click_script="sketchybar --reload; aerospace reload-config" 
+
+sketchybar --add bracket rightSpace clock volume battery binding.mode refresh  \
+           --set         rightSpace background.color=0xaa000000 \
+                                background.corner_radius=4  \
+                                background.height=25
+
+
+
+##### Force all scripts to run the first time (never do this in a script) #####
+sketchybar --update
+
+sketchybar --trigger aerospace_window_title_change
+sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
+sketchybar --trigger aerospace_mode_change BINDING_MODE=$(aerospace list-modes --current)
